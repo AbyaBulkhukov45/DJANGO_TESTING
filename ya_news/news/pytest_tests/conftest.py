@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.test import Client
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -90,4 +91,23 @@ def client_data():
     user = User.objects.create(username='Анонимус')
     client = Client()
     client.force_login(user)
+    return client
+
+
+@pytest.fixture
+def urls(news):
+    return {
+        'home': reverse('news:home'),
+        'detail': reverse('news:detail', args=[News.objects.first().id]),
+    }
+
+
+@pytest.fixture
+def admin(django_user_model):
+    return django_user_model.objects.create(username='user')
+
+
+@pytest.fixture
+def admin_client(admin, client):
+    client.force_login(admin)
     return client

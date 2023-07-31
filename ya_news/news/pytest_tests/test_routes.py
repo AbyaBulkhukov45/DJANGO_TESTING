@@ -1,24 +1,47 @@
 import pytest
 from http import HTTPStatus
+
 from django.urls import reverse
+from django.test import Client
 from pytest_django.asserts import assertRedirects
+
+
+@pytest.fixture
+def author_client(author, client):
+    client.force_login(author)
+    return client
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    'name, args',
-    (
-        ('news:home', None),
-        ('news:detail', "1"),
-        ('users:login', None),
-        ('users:logout', None),
-        ('users:signup', None),
-    ),
+    'url, client, expected_status_code',
+    [
+        (reverse('news:home'), Client(), HTTPStatus.OK),
+        (reverse('news:detail', args=[1]), Client(), HTTPStatus.OK),
+        (reverse('users:login'), Client(), HTTPStatus.OK),
+        (reverse('users:logout'), Client(), HTTPStatus.OK),
+        (reverse('users:signup'), Client(), HTTPStatus.OK),
+        (reverse('news:edit', args=[1]), Client(), HTTPStatus.FOUND),
+        (reverse('news:delete', args=[1]), Client(), HTTPStatus.FOUND),
+    ]
 )
-def test_different_pages_for_anonymous_user(client, name, news, args):
-    url = reverse(name, args=args)
+def test_status_codes_for_anon_user(news, client, url, expected_status_code):
     response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == expected_status_code
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'url, client, exp_status_code',
+    [
+        (reverse('news:edit', args=[1]), Client(), HTTPStatus.NOT_FOUND),
+        (reverse('news:delete', args=[1]), Client(), HTTPStatus.NOT_FOUND),
+    ]
+)
+def test_stat_code_admin(news, client, url, exp_status_code, admin_client):
+    client = admin_client
+    response = client.get(url)
+    assert response.status_code == exp_status_code
 
 
 @pytest.mark.django_db
@@ -32,18 +55,3 @@ def test_redirects_for_anonymous_user(client, name, comment):
     expected_url = f'{login_url}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_url)
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize('view_name', ['edit', 'delete'])
-def test_access_to_comment_pages(author_client, client, comment, view_name):
-    url = reverse(f'news:{view_name}', args=[comment.id])
-    expected_redirect_url = reverse('users:login')
-
-    if author_client:
-        response = author_client.get(url)
-        assert response.status_code == HTTPStatus.OK
-    else:
-        response = client.get(url)
-        assert response.status_code == HTTPStatus.FOUND
-        assert response.url.startswith(expected_redirect_url)
