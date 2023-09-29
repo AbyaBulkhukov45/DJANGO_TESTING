@@ -61,11 +61,9 @@
 
 Клонируйте репозиторий:
 
-```bash
-git clone https://github.com/your_username/dev-django-testing.git
 ```
-
-
+https://github.com/AbyaBulkhukov45/DJANGO_TESTING/
+```
 
 Создайте виртуальное окружение и активируйте его:
 ```
