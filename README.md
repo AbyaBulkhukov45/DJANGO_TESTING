@@ -92,26 +92,3 @@ python -m unittest ya_note/notes/tests/test_*.py
 
 Автор: 
 * [Абя Булхуков](https://github.com/AbyaBulkhukov45) :+1:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
