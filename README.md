@@ -61,8 +61,8 @@
 
 Клонируйте репозиторий:
 
-```
-https://github.com/AbyaBulkhukov45/DJANGO_TESTING/
+```bash
+git@github.com:AbyaBulkhukov45/DJANGO_TESTING.git
 ```
 
 Создайте виртуальное окружение и активируйте его:
